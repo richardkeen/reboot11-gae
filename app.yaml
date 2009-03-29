@@ -1,0 +1,14 @@
+application: reboot11
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /schedule.*
+  script: schedule.py
+  
+- url: /activity.*
+  script: activity.py
+
+- url: .*
+  script: main.py

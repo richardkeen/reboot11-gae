@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<title>reboot11 schedule</title>
+	
+</head>
+
+<body>
+    <h1>reboot 11 schedule</h1>
+    
+    <form action="/schedule" method="post" accept-charset="utf-8">
+        <p><label for="title">title</label><input type="text" name="title" value="" id="title" ></p>
+        <p><label for="who">who</label><input type="text" name="who" value="" id="who"></p>
+        <p><label for="start_time">start time</label><input type="text" name="start_time" value="" id="start_time"></p>
+        <p><label for="end_time">end time</label><input type="text" name="end_time" value="" id="end_time"></p>
+        <p><label for="room">room</label><input type="text" name="room" value="" id="room"></p>
+        <p><label for="session_type">session type</label><input type="text" name="session_type" value="" id="session_type"></p>
+        <p><label for="description">description</label><input type="text" name="description" value="" id="description"></p>
+        <p><label for="synposis">synposis</label><input type="text" name="synposis" value="" id="synposis"></p>
+        
+        
+        <p><input type="submit" value="add it &rarr;"></p>
+    </form>
+    
+    {% for day in schedule %}
+    <h2>Day {{ forloop.counter }}</h2>
+    {% for time in day %}
+    <h3>Starting at {{ time.start_time }}</h3>
+    <ol>
+        {% for session in time.sessions %}
+        <li>{{ session.title }}</li>
+        {% endfor %}
+    </ol>
+    {% endfor %}
+    {% endfor %}
+</body>
+</html>
