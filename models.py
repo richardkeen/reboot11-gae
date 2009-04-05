@@ -8,6 +8,6 @@ class Session(db.Model):
   end_time = db.DateTimeProperty(required=True)
   room = db.StringProperty()
   session_type = db.StringProperty()
-  description = db.TextProperty()
+  details_url = db.LinkProperty()
   created = db.DateTimeProperty(auto_now_add=True)
   last_modified = db.DateTimeProperty()

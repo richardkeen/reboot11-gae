@@ -4,9 +4,13 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /schedule.*
+- url: /schedule(\.json)?
   script: schedule.py
-  
+
+- url: /schedule/import
+  script: schedule.py
+  login: admin
+
 - url: /activity.*
   script: activity.py
 

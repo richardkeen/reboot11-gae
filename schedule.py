@@ -22,6 +22,8 @@ import datetime
 import logging
 import time
 import os
+import gdata.spreadsheet.service
+import gdata.alt.appengine
 
 from google.appengine.ext import webapp
 from google.appengine.ext import db
@@ -86,15 +88,52 @@ class ScheduleHandler(webapp.RequestHandler):
               )
     session.put()
     self.redirect('/schedule')
-    
-class TempHandler(webapp.RequestHandler):
 
+class ImportSpreadsheetHandler(webapp.RequestHandler):
+    
   def get(self):
-    for i in range(20):
-      session = models.Session( title = "small room Session %s" % i,
-                                start_time = datetime.datetime.now() + datetime.timedelta(hours = i),
-                                end_time = datetime.datetime.now() + datetime.timedelta(hours = i+1))      
-      session.put()  
+    key = self.request.get('key')
+
+    if not key:
+      self.response.out.write("No spreadsheet key provided")
+      return
+
+    gd_client = gdata.spreadsheet.service.SpreadsheetsService()
+    gdata.alt.appengine.run_on_appengine(gd_client)
+
+    list_feed = gd_client.GetListFeed(key, visibility='public', projection='values')
+    counter = 0
+
+    for i, entry in enumerate(list_feed.entry):
+      row = entry.custom
+      session = models.Session(
+                  title         = unicode(row['title'].text),
+                  start_time    = datetime.datetime.strptime(row['date'].text + ' '
+                                                             + row['start'].text, '%d/%m/%Y %H:%M:00'),
+                  end_time      = datetime.datetime.strptime(row['date'].text + ' '
+                                                             + row['end'].text, '%d/%m/%Y %H:%M:00'),
+                  last_modified = datetime.datetime.now()
+                )
+      
+      if row.has_key('who'):
+        session.who = unicode(row['who'].text)
+      
+      if row.has_key('synopsis'):
+        session.synopsis = unicode(row['synopsis'].text)
+      
+      if row.has_key('room'):
+        session.room = unicode(row['room'].text)
+      
+      if row.has_key('type'):
+        session.session_type = unicode(row['type'].text)
+      
+      if row.has_key('url'):
+        session.details_url = row['url'].text
+      
+      session.put()
+      counter = counter + 1
+
+    self.response.out.write("Imported %s sessions" % counter)
 
 class GqlEncoder(simplejson.JSONEncoder):
 
@@ -140,7 +179,7 @@ class GqlEncoder(simplejson.JSONEncoder):
 
 def main():
   application = webapp.WSGIApplication([('/schedule(\.json)?', ScheduleHandler),
-                                        ('/schedule/temp', TempHandler)],
+                                        ('/schedule/import', ImportSpreadsheetHandler)],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
